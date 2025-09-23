@@ -1,0 +1,3 @@
+# Ignore files directly in hooks directory, but not subdirectories
+/hooks/*
+!/hooks/*/

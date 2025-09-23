@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
+
+# Avoid recursion
+[[ -z "${RECURSE_HOOK:-}" ]] || exit
+export RECURSE_HOOK=1
+
+[[ "${VERBOSE:-0}" =~ ^[0-9]+$ ]] && VERBOSE="${VERBOSE:-0}" || VERBOSE=1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+GIT_DIR="$(git rev-parse --absolute-git-dir)"
+
+if [[ "$SCRIPT_NAME" =~ "^__" ]]; then
+    # Someone is trying to execute the __hook-template?!?
+    echo >&2 "ERROR: something is wrong in the template expansion"
+    exit 1
+fi
+
+call_hook() {
+    local hookName="$1"
+    shift
+    [[ "$VERBOSE" -lt 1 ]] || echo >&2 "$SCRIPT_NAME: call $hookName"
+    "$hookName" "$@" && RESULT=0 || RESULT=$?
+    if [[ $RESULT != 0 ]]; then
+        shortName="${hookName/$HOME/\~}"
+        echo >&2 "$shortName failed ($RESULT); aborting commit"
+        exit "$RESULT"
+    fi
+}
+
+GLOBAL_HOOK_DIR="$SCRIPT_DIR/$SCRIPT_NAME.d"
+mkdir -p "$GLOBAL_HOOK_DIR"
+while IFS= read -r -d '' globalHook; do
+    call_hook "$globalHook" "$@"
+done < <(find "$GLOBAL_HOOK_DIR" -type f -print0 | sort -z || true)
+
+REPO_HOOK_DIR="$GIT_DIR/hooks/$SCRIPT_NAME.d"
+mkdir -p "$REPO_HOOK_DIR"
+while IFS= read -r -d '' repoHook; do
+    call_hook "$repoHook" "$@"
+done < <(find "$REPO_HOOK_DIR" -type f -print0 | sort -z || true)
+
+baseHook="$GIT_DIR/hooks/$SCRIPT_NAME"
+if [[ -x "$baseHook" ]]; then
+    call_hook "$baseHook" "$@"
+fi
