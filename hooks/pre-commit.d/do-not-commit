@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Prevent commiting files containing "do not commit"
+set -Eeuo pipefail
+trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
+
+PATTERN="DO NOT COMMIT"
+
+# Loop over staged files and check for PATTERN
+# Filter only added (A), copied (C), modified (M) files
+OIFS="$IFS"
+IFS=$'\n'
+ERROR=false
+for file in $(git diff --staged --name-only --diff-filter=ACM); do
+    { git show :0:"$file" | grep -Eqi "$PATTERN" &>/dev/null; } || continue
+    echo >&2 "'$file' contains '$PATTERN'"
+    ERROR=true
+done
+IFS="$OIFS"
+
+if [[ "$ERROR" != "false" ]]; then
+    if [[ -z "${IGNORE_DO_NOT_COMMIT:-}" ]]; then
+        exit 1
+    fi
+fi
