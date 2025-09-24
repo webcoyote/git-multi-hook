@@ -11,6 +11,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 GIT_DIR="$(git rev-parse --absolute-git-dir)"
 
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
 if [[ "$SCRIPT_NAME" =~ "^__" ]]; then
     # Someone is trying to execute the __hook-template?!?
     echo >&2 "ERROR: something is wrong in the template expansion"
@@ -20,11 +25,20 @@ fi
 call_hook() {
     local hookName="$1"
     shift
-    [[ "$VERBOSE" -lt 1 ]] || echo >&2 "$SCRIPT_NAME: call $hookName"
+    local shortName="${hookName/$HOME/\~}"
+
+    # `[[ -x "$hookName" ]]` returns true on OSX when the file has ACLS with execute
+    # permission, even though the file is `chmod -x`, so use `command -v` instead
+    if ! command -v "$hookName" &>/dev/null ; then
+        [[ "$VERBOSE" -lt 1 ]] || echo -e >&2 "${YELLOW}$SCRIPT_NAME: skip $shortName${NC}"
+        return
+    fi
+
+    [[ "$VERBOSE" -lt 1 ]] || echo -e >&2 "${GREEN}$SCRIPT_NAME: call $shortName${NC}"
     "$hookName" "$@" && RESULT=0 || RESULT=$?
+
     if [[ $RESULT != 0 ]]; then
-        shortName="${hookName/$HOME/\~}"
-        echo >&2 "$shortName failed ($RESULT); aborting commit"
+        echo -e >&2 "${RED}$SCRIPT_NAME: $shortName failed ($RESULT); aborting${NC}"
         exit "$RESULT"
     fi
 }

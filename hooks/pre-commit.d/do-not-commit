@@ -2,8 +2,11 @@
 # Prevent commiting files containing "do not commit"
 set -Eeuo pipefail
 trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
+SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 PATTERN="DO NOT COMMIT"
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
 # Loop over staged files and check for PATTERN
 # Filter only added (A), copied (C), modified (M) files
@@ -12,7 +15,7 @@ IFS=$'\n'
 ERROR=false
 for file in $(git diff --staged --name-only --diff-filter=ACM); do
     { git show :0:"$file" | grep -Eqi "$PATTERN" &>/dev/null; } || continue
-    echo >&2 "'$file' contains '$PATTERN'"
+    echo -e >&2 "${RED}$SCRIPT_NAME: $PATTERN found in $file${NC}"
     ERROR=true
 done
 IFS="$OIFS"
