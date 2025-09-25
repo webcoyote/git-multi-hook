@@ -44,16 +44,18 @@ call_hook() {
 }
 
 GLOBAL_HOOK_DIR="$SCRIPT_DIR/$SCRIPT_NAME.d"
-mkdir -p "$GLOBAL_HOOK_DIR"
-while IFS= read -r -d '' globalHook; do
-    call_hook "$globalHook" "$@"
-done < <(find "$GLOBAL_HOOK_DIR" -type f -print0 | sort -z || true)
+if [[ -d "$GLOBAL_HOOK_DIR" ]]; then
+    while IFS= read -r -d '' globalHook; do
+        call_hook "$globalHook" "$@"
+    done < <(find "$GLOBAL_HOOK_DIR" -type f -print0 | sort -z || true)
+fi
 
 REPO_HOOK_DIR="$GIT_DIR/hooks/$SCRIPT_NAME.d"
-mkdir -p "$REPO_HOOK_DIR"
-while IFS= read -r -d '' repoHook; do
-    call_hook "$repoHook" "$@"
-done < <(find "$REPO_HOOK_DIR" -type f -print0 | sort -z || true)
+if [[ -d "$REPO_HOOK_DIR" ]]; then
+    while IFS= read -r -d '' repoHook; do
+        call_hook "$repoHook" "$@"
+    done < <(find "$REPO_HOOK_DIR" -type f -print0 | sort -z || true)
+fi
 
 baseHook="$GIT_DIR/hooks/$SCRIPT_NAME"
 if [[ -x "$baseHook" ]]; then
