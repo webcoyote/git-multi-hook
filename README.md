@@ -121,4 +121,4 @@ See [LICENSE.md](LICENSE.md) for details.
 
 # 😻 Thanks to
 
-Thanks to [Simon Epskamp](https://stackoverflow.com/users/146738/simon-epskamp) based on this [stackoverflow post](https://stackoverflow.com/a/61341619).
+Thanks to [Simon Epskamp](https://stackoverflow.com/users/146738/simon-epskamp). This repo is based on his [stackoverflow post](https://stackoverflow.com/a/61341619).
