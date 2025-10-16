@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Run shellcheck on shell-scripts before commit
 set -Eeuo pipefail
 trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,9 +20,12 @@ trace () {
 debug () {
     [[ "$VERBOSE" -lt 1 ]] || echo >&2 -e "🔍 ${CYAN}$*${NC}"
 }
+warn () {
+    echo >&2 -e "⚠️ ${YELLOW}$*${NC}"
+}
 
 if ! command -v shellcheck &>/dev/null ; then
-    echo -e >&2 "${YELLOW}$SCRIPT_NAME: shellcheck not installed; skipping checks${NC}"
+    warn "$SCRIPT_NAME: shellcheck not installed; skipping checks"
     exit 0
 fi
 
