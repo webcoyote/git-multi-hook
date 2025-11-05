@@ -29,4 +29,6 @@ for file in $(git diff --staged --name-only --diff-filter=ACM); do
 done
 IFS="$OIFS"
 
-exec "scripts/lint" "${STAGED_FILES[@]}"
+if [[ ${#STAGED_FILES[@]} -ne 0 ]]; then
+    exec "scripts/lint" "${STAGED_FILES[@]}"
+fi
