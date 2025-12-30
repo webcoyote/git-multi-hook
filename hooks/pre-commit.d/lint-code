@@ -2,33 +2,15 @@
 # Run "scripts/lint" in the project repository if it exists
 set -Eeuo pipefail
 trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
-SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
-REPO_DIR="$(git rev-parse --show-toplevel)"
-cd "$REPO_DIR"
-
-CYAN='\033[36m'
-NC='\033[0m' # No Color
-
-# Set VERBOSE=non-number to VERBOSE=1, otherwise use the number
-[[ "${VERBOSE:-0}" =~ ^[0-9]+$ ]] && VERBOSE="${VERBOSE:-0}" || VERBOSE=1
-debug () {
-    [[ "$VERBOSE" -lt 1 ]] || echo >&2 -e "🔍 ${CYAN}$*${NC}"
-}
+# shellcheck source-path=SCRIPTDIR
+source "$(dirname "${BASH_SOURCE[0]}")/../__common"
 
 if ! command -v "scripts/lint" &>/dev/null ; then
-    debug "$SCRIPT_NAME: scripts/lint not found; skipping lint"
+    debug "scripts/lint not found; skipping lint"
     exit 0
 fi
 
-# Filter only added (A), copied (C), modified (M) files
-OIFS="$IFS"
-IFS=$'\n'
-declare -a STAGED_FILES
-for file in $(git diff --staged --name-only --diff-filter=ACM); do
-    STAGED_FILES+=("$file")
-done
-IFS="$OIFS"
-
-if [[ ${#STAGED_FILES[@]} -ne 0 ]]; then
-    exec "scripts/lint" "${STAGED_FILES[@]}"
+get_arguments_or_staged_files ".*" "$@"
+if [[ ${#FILES[@]} -ne 0 ]]; then
+    exec "scripts/lint" "${FILES[@]}"
 fi
