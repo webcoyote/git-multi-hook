@@ -41,3 +41,6 @@ done
 # - Convert (e.g.) /Users/foo/bar/baz to ~/bar/baz
 HOOKS_PATH="${HOOKS_DIR/$HOME/\~}"
 git config --global core.hooksPath "$HOOKS_PATH"
+
+# Create an alias for installing git lfs
+git config --global alias.lfs-install '!git -c core.hooksPath="$(git rev-parse --git-dir)/hooks" lfs install'

@@ -17,7 +17,7 @@ When you trigger any Git hook (like `pre-commit`), here's what happens behind th
 3. **Fail fast** → If any hook returns non-zero, the chain stops immediately
 4. **Deterministic order** → Scripts run in alphabetical order (use `01-`, `02-` prefixes for ordering)
 
-All your existing hooks still work with no changes.
+Existing hooks work with no changes.
 
 ## 🚀 Installation
 
@@ -28,12 +28,23 @@ Run the setup script and you're good to go:
 # => creates hooks and sets gitconfig core.hooksPath
 ```
 
+## Caveats
+
+Installing Git LFS requires a little bit of extra magic to make sure the LFS hooks are installed in the correct directory, sorry!
+
+```bash
+git -c core.hooksPath="$(git rev-parse --git-dir)/hooks" lfs install
+
+# Or use the alias created by the setup script
+git lfs-install
+```
+
 ## ✨ Adding Your Own Hooks
 
 Want to add a new hook? Easy peasy:
 
 ```bash
-# Create the hook directory (if it doesn't exist already)
+# Create the directory for the type of hook you want (if it doesn't exist already)
 mkdir -p hooks/pre-commit.d
 
 # Drop your script in there
@@ -85,7 +96,7 @@ ALL standard Git hooks supported:
 Something not working? Turn on verbose mode to see what's happening:
 
 ```bash
-VERBOSE=1 git commit -m "debugging time!"
+VERBOSE=2 git commit -m "debugging time!"
 ```
 
 Shows you which hooks are running in what order.
@@ -94,7 +105,7 @@ Shows you which hooks are running in what order.
 
 ### 🤔 Skip hooks for one command ("I know what I'm doing" mode)
 ```bash
-git -c core.hooksPath= commit -m "living dangerously"
+git --no-verify commit -m "living dangerously"
 ```
 
 ### ☢️ Turn off globally (nuclear option)
