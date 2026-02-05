@@ -56,6 +56,7 @@ call_hook() {
     local output_file="$RESULTS_DIR/$id.output"
     (
         set +e
+        trap - ERR
         "$hookName" "$@"
     ) >"$output_file" 2>&1 &
     HOOK_PIDS+=("$!")
