@@ -46,7 +46,7 @@ get_arguments_or_staged_files ".*" "$@"
 
 # Only shellcheck the shell scripts
 SHELL_FILES=()
-for file in "${FILES[@]}"; do
+for file in "${FILES[@]:-}"; do
     # shellcheck disable=SC2310 # set -e will be disabled
     if is_shell_script "$file" ; then
         SHELL_FILES+=("$file")
@@ -54,6 +54,6 @@ for file in "${FILES[@]}"; do
 done
 
 # Scan all the files
-if [[ "${#SHELL_FILES[@]}" -ne 0 ]]; then
+if (( ${#SHELL_FILES[@]} > 0 )); then
     shellcheck -a -S style "${SHELL_FILES[@]}"
 fi

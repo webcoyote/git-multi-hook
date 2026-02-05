@@ -22,7 +22,7 @@ if [[ ! -f "$REPO_DIR/.swiftlint.yml" ]]; then
 fi
 
 get_arguments_or_staged_files '\.swift$' "$@"
-if [[ ${#FILES[@]} -ne 0 ]]; then
+if (( ${#FILES[@]} > 0 )); then
     if [[ $VERBOSE -lt 1 ]]; then
         ARGS=("--quiet")
     else

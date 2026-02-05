@@ -11,6 +11,6 @@ if ! command -v "scripts/validate" &>/dev/null ; then
 fi
 
 get_arguments_or_staged_files ".*" "$@"
-if [[ ${#FILES[@]} -ne 0 ]]; then
+if (( ${#FILES[@]} > 0 )); then
     exec "scripts/validate" "${FILES[@]}"
 fi

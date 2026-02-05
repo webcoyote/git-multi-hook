@@ -10,7 +10,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../__common"
 SOURCE_EXTENSIONS="\.(swift|h|m|mm|c|cpp|cc|cxx|hpp|hxx|js|ts|tsx|jsx|py|rb|java|kt|rs|go|php|cs|vb|fs|scala|clj|hs|elm|dart|lua|sh|bash|zsh|fish|ps1|bat|cmd|sql|r|R|jl|ex|exs|erl|hrl|pl|pro|lisp|scm|rkt|ml|mli|f|f90|f95|f03|f08|for|ftn|pas|pp|inc|asm|s|S|nasm|yasm|gas|v|sv|svh|vhd|vhdl|tcl|tk|vim|lua|cmake|make|mk|am|in|ac|m4|tex|bib|md|rst|txt|json|xml|yaml|yml|toml|ini|cfg|conf|config|properties|gradle|sbt|pom|gemfile|rakefile|makefile|dockerfile|vagrantfile|gitignore|gitattributes|editorconfig|eslintrc|prettierrc|babelrc|tsconfig|jsconfig|package|composer|cargo|project|solution|workspace|pbxproj|xcodeproj|xcworkspace)$"
 
 get_arguments_or_staged_files "$SOURCE_EXTENSIONS" "$@"
-for file in "${FILES[@]}"; do
+for file in "${FILES[@]:-}"; do
     # Check if file is non-empty and doesn't end with newline
     if [[ -s "$file" ]] && [[ "$(tail -c 1 "$file")" != "" ]]; then
         echo -e >&2 "${GREEN}$SCRIPT_NAME: Adding blank line to $file${NC}"

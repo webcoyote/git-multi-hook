@@ -16,7 +16,7 @@ fi
 # Loop over staged files and check for PATTERN
 get_arguments_or_staged_files ".*" "$@"
 ERROR=false
-for file in "${FILES[@]}"; do
+for file in "${FILES[@]:-}"; do
     rg -qi "$PATTERN" "$file" &>/dev/null || continue
     "$LOGGER" "$PATTERN found in $file"
     ERROR=true
