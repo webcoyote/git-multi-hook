@@ -65,6 +65,7 @@ get_arguments_or_staged_files() {
             fi
         done
     else
+        # shellcheck disable=SC2310 # set -e will be disabled -- that's what we want
         cd "$(repo_dir)" || exit 1
         local OIFS="$IFS"
         IFS=$'\n'
