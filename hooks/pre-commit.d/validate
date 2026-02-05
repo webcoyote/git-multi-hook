@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Run "scripts/validate" in the project repository if it exists
+set -Eeuo pipefail
+trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
+# shellcheck source-path=SCRIPTDIR
+source "$(dirname "${BASH_SOURCE[0]}")/../__common"
+
+if ! command -v "scripts/validate" &>/dev/null ; then
+    debug "scripts/validate not found; skipping validate"
+    exit 0
+fi
+
+get_arguments_or_staged_files ".*" "$@"
+if [[ ${#FILES[@]} -ne 0 ]]; then
+    exec "scripts/validate" "${FILES[@]}"
+fi
