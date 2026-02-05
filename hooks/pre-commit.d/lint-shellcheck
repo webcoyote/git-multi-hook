@@ -55,5 +55,5 @@ done
 
 # Scan all the files
 if [[ "${#SHELL_FILES[@]}" -ne 0 ]]; then
-    shellcheck "${SHELL_FILES[@]}"
+    shellcheck -a -S style "${SHELL_FILES[@]}"
 fi
