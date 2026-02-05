@@ -17,7 +17,7 @@ fi
 
 REPO_DIR="$(repo_dir)"
 if [[ ! -f "$REPO_DIR/.swiftlint.yml" ]]; then
-    trace "no config file found; skipping checks"
+    debug "no config file found; skipping checks"
     exit 0
 fi
 
