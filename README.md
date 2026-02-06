@@ -3,21 +3,26 @@
 - Multiple global git hooks
 - Multiple per-repo git hooks
 - Existing hooks keep working
+- All hooks run in parallel
 - No configuration files
 
 Configure Git hooks once, use them everywhere. No more copy-pasting hooks between repos like it's 2005.
 
+
 ## 🎯 How It Works
 
-When you trigger any Git hook (like `pre-commit`), here's what happens behind the scenes:
+When you trigger any Git hook (like `pre-commit`), Git Multi-Hook runs all of the following triggers at the same time, in parallel.
 
-1. **global hooks run first** → Executes all scripts in `./hooks/pre-commit.d/*`
-2. **Repo-specific hooks follow** → Then runs any hooks in `$YOUR_REPO/.git/hooks/pre-commit.d/*`
-3. **Default hook runs last** → `$YOUR_REPO/.git/hooks/pre-commit`
-3. **Fail fast** → If any hook returns non-zero, the chain stops immediately
-4. **Deterministic order** → Scripts run in alphabetical order (use `01-`, `02-` prefixes for ordering)
+1. **Global hooks** → all scripts in `./hooks/pre-commit.d/*`
+2. **Repo hooks** → all scripts in `$YOUR_REPO/.git/hooks/pre-commit.d/*`
+3. **Default hook** → `$YOUR_REPO/.git/hooks/pre-commit`
 
-Existing hooks work with no changes.
+Within each category, scripts are started in alphabetical order (use `01-`, `02-` prefixes for ordering).
+
+All the hooks run at the same time (up to the number of CPUs in the computer), and then results are reported in launch order, one after another until a hook reports failure or all succeed.
+
+Existing hooks work with no changes, except care must be taken to install `git-lfs` to avoid overwriting existing hooks; see [Caveats](#Caveats) below.
+
 
 ## 🚀 Installation
 
@@ -27,6 +32,7 @@ Run the setup script and you're good to go:
 ./setup
 # => creates hooks and sets gitconfig core.hooksPath
 ```
+
 
 ## Caveats
 
@@ -39,9 +45,10 @@ git -c core.hooksPath="$(git rev-parse --git-dir)/hooks" lfs install
 git lfs-install
 ```
 
+
 ## ✨ Adding Your Own Hooks
 
-Want to add a new hook? Easy peasy:
+Want to add a new global hook? Easy peasy:
 
 ```bash
 # Create the directory for the type of hook you want (if it doesn't exist already)
@@ -56,11 +63,6 @@ chmod +x hooks/pre-commit.d/your-awesome-script.sh
 
 Add repo-specific git hooks too (e.g. copy to `$YOUR-REPO/.git/hooks/pre-commit.d/`)
 
-
-**Deterministic Ordering** Name scripts with number prefixes to guaranteed ordering:
-- `01-lint.sh` → Runs first
-- `02-format.sh` → Runs second
-- `99-final-check.sh` → Runs last
 
 ## 📚 Supported Hooks
 
@@ -91,6 +93,7 @@ ALL standard Git hooks supported:
 - **`post-update`** → Run after all refs are updated
 - **`push-to-checkout`** → Handle non-bare repository pushes
 
+
 ## 🔍 Debugging
 
 Something not working? Turn on verbose mode to see what's happening:
@@ -100,6 +103,7 @@ VERBOSE=2 git commit -m "debugging time!"
 ```
 
 Shows you which hooks are running in what order.
+
 
 ## 🚫 Disabling Hooks
 
@@ -113,19 +117,33 @@ git --no-verify commit -m "living dangerously"
 git config --global --unset core.hooksPath
 ```
 
-## 🎁 Bonus: Example Hook Included!
 
-Check out `hooks/pre-commit.d/end-with-blank-line` - it automatically adds blank lines to the end of your source files. Because nobody likes that "No newline at end of file" message!
+## 🎁 Bonus: Batteries (Hooks) Included!
+
+This repository includes several hooks already pre-configured.
+
+### Pre-Commit Hooks
+
+- `end-with-blank-line`: Ensures staged source and config files end with a trailing newline.
+- `find-do-not-commit`: Blocks commits ehen staged files contain `DO NOT COMMIT` (set `IGNORE_DO_NOT_COMMIT=1` to warn instead).
+- `lint-code`: Runs `$REPO/scripts/lint` on staged files if it exists.
+- `lint-nodejs`: Runs `npm|yarn|pnpm run lint` if `$REPO/package.json` has a `lint` script.
+- `lint-shellcheck`: Runs `shellcheck` on staged shell scripts (set `IGNORE_SHELLCHECK=1` to skip).
+- `lint-swift`: Runs `swiftlint` on staged `.swift` files when `.swiftlint.yml` is present (set `IGNORE_SWIFT_LINT=1` to skip).
+- `prevent-commit-secrets`: Runs `ripsecrets` against staged files (set `IGNORE_SECRETS=1` to skip).
+- `validate`: Runs `$REPO/scripts/validate` on staged files if it exists.
+
 
 ## 🤝 Contributing
 
-Found a bug? Have an awesome hook to share? PRs are welcome! Let's make Git hooks great again!
+Found a bug? Have an awesome hook to share? PRs are welcome!
+
 
 # 🪪 License
 
 Apache License, Version 2.0
 
-git-multi-hook Copyright © 2025 Patrick Wyatt
+git-multi-hook Copyright © 2026 Patrick Wyatt
 
 See [LICENSE.md](LICENSE.md) for details.
 
