@@ -39,7 +39,6 @@ error() {
 repo_dir() {
     git rev-parse --show-toplevel
 }
-
 # Get staged files (Added, Copied, Modified)
 # Usage: get_arguments_or_staged_files extension_pattern file_arguments
 #   extension_pattern: regex to filter by extension (e.g., "\.swift$")
@@ -65,8 +64,8 @@ get_arguments_or_staged_files() {
             fi
         done
     else
-        # shellcheck disable=SC2310 # set -e will be disabled -- that's what we want
-        cd "$(repo_dir)" || exit 1
+        # Change to repository root directory
+        pushd "$(repo_dir)" >/dev/null || abort "git repository root not found"
         local OIFS="$IFS"
         IFS=$'\n'
         for file in $(git diff --staged --name-only --diff-filter=ACM); do
@@ -75,5 +74,6 @@ get_arguments_or_staged_files() {
             fi
         done
         IFS="$OIFS"
+        popd >/dev/null || abort "unable to restore directory"
     fi
 }
