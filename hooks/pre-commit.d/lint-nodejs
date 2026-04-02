@@ -14,7 +14,7 @@ if [[ ! -f "package.json" ]]; then
 fi
 
 # Check if package.json has a lint script
-if ! rg -q '"lint"' package.json; then
+if ! grep -q '"lint"' package.json; then
     debug "No lint script found in package.json; skipping"
     exit 0
 fi

@@ -39,6 +39,7 @@ error() {
 repo_dir() {
     git rev-parse --show-toplevel
 }
+
 # Get staged files (Added, Copied, Modified)
 # Usage: get_arguments_or_staged_files extension_pattern file_arguments
 #   extension_pattern: regex to filter by extension (e.g., "\.swift$")
@@ -65,6 +66,7 @@ get_arguments_or_staged_files() {
         done
     else
         # Change to repository root directory
+        # shellcheck disable=SC2310 # This function is invoked in an || condition so set -e will be disabled. Invoke separately if failures should cause the script to exit
         pushd "$(repo_dir)" >/dev/null || abort "git repository root not found"
         local OIFS="$IFS"
         IFS=$'\n'
