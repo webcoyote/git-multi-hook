@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prevent commiting files containing "do not commit"
+# Prevent committing files containing "do not commit"
 set -Eeuo pipefail
 trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
 # shellcheck source-path=SCRIPTDIR

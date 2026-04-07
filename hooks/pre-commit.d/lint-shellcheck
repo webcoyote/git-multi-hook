@@ -28,7 +28,7 @@ is_shell_script() {
     fi
 
     # Skip binary files
-    if ! file --mime-encoding "$file" | rg -q 'us-ascii|utf-8|iso-8859'; then
+    if ! file --mime-encoding "$file" | grep -qE 'us-ascii|utf-8|iso-8859'; then
         trace "Skipping $file (binary file)"
         return 1
     fi

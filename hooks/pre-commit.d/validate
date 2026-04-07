@@ -5,6 +5,8 @@ trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
 # shellcheck source-path=SCRIPTDIR
 source "$(dirname "${BASH_SOURCE[0]}")/../__common"
 
+cd "$(repo_dir)"
+
 if ! command -v "scripts/validate" &>/dev/null ; then
     debug "scripts/validate not found; skipping validate"
     exit 0

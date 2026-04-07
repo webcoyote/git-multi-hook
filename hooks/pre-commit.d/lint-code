@@ -5,6 +5,8 @@ trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
 # shellcheck source-path=SCRIPTDIR
 source "$(dirname "${BASH_SOURCE[0]}")/../__common"
 
+cd "$(repo_dir)"
+
 if ! command -v "scripts/lint" &>/dev/null ; then
     debug "scripts/lint not found; skipping lint"
     exit 0

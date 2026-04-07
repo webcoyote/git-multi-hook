@@ -35,6 +35,11 @@ error() {
     echo >&2 -e "❌ ${RED}$SCRIPT_NAME: $*${NC}"
 }
 
+abort () {
+    error "$*"
+    exit 1
+}
+
 # Get repository root directory
 repo_dir() {
     git rev-parse --show-toplevel
@@ -54,9 +59,15 @@ get_arguments_or_staged_files() {
         for file in "$@"; do
             if [[ -d "$file" ]]; then
                 # Find all matching files in the directory
-                while IFS= read -r -d '' found_file; do
-                    FILES+=("$(realpath "$found_file")")
-                done < <(fd --hidden -t f "$pattern" --exclude '.git' -0 "$file")
+                if command -v fd &>/dev/null; then
+                    while IFS= read -r -d '' found_file; do
+                        FILES+=("$(realpath "$found_file")")
+                    done < <(fd --hidden -t f "$pattern" --exclude '.git' -0 "$file")
+                else
+                    while IFS= read -r -d '' found_file; do
+                        FILES+=("$(realpath "$found_file")")
+                    done < <(find "$file" -type f -not -path '*/.git/*' -print0 | grep -zE "$pattern")
+                fi
             else
                 # Match file to pattern
                 if [[ "$file" =~ $pattern ]]; then

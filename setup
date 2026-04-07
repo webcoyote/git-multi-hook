@@ -26,14 +26,13 @@ HOOKS+=(push-to-checkout)
 
 # Ensure hook template is executable
 HOOKS_DIR="$SCRIPT_DIR/hooks"
-cd "$HOOKS_DIR"
-chmod +x "__hook-template"
+chmod +x "$HOOKS_DIR/__hook-template"
 
 # Create all the hooks and make a directory for multi-hooking
 for hook in "${HOOKS[@]}"; do
-  mkdir -p "$hook.d"
-  if [[ -n "${FORCE:-}" ]] || [[ ! -f "$hook" ]]; then
-    /bin/ln -sf "__hook-template" "$hook"
+  mkdir -p "$HOOKS_DIR/$hook.d"
+  if [[ -n "${FORCE:-}" ]] || [[ ! -f "$HOOKS_DIR/$hook" ]]; then
+    /bin/ln -sf "__hook-template" "$HOOKS_DIR/$hook"
   fi
 done
 

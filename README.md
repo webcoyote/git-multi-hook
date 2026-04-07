@@ -125,7 +125,7 @@ This repository includes several hooks already pre-configured.
 ### Pre-Commit Hooks
 
 - `end-with-blank-line`: Ensures staged source and config files end with a trailing newline.
-- `find-do-not-commit`: Blocks commits ehen staged files contain `DO NOT COMMIT` (set `IGNORE_DO_NOT_COMMIT=1` to warn instead).
+- `find-do-not-commit`: Blocks commits when staged files contain `DO NOT COMMIT` (set `IGNORE_DO_NOT_COMMIT=1` to warn instead).
 - `lint-code`: Runs `$REPO/scripts/lint` on staged files if it exists.
 - `lint-nodejs`: Runs `npm|yarn|pnpm run lint` if `$REPO/package.json` has a `lint` script.
 - `lint-shellcheck`: Runs `shellcheck` on staged shell scripts (set `IGNORE_SHELLCHECK=1` to skip).

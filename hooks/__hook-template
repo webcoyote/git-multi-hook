@@ -17,7 +17,7 @@ GREEN='\033[0;32m'
 GRAY='\033[90m'
 NC='\033[0m' # No Color
 
-if [[ "$SCRIPT_NAME" =~ "^__" ]]; then
+if [[ "$SCRIPT_NAME" =~ ^__ ]]; then
     # Someone is trying to execute the __hook-template?!?
     echo >&2 "ERROR: something is wrong in the template expansion"
     exit 1
@@ -111,7 +111,7 @@ collect_results() {
     set -e
 
     if [[ "$exit_code" -ne 0 ]]; then
-        echo -e >&2 "${RED}$SCRIPT_NAME: commit failed${NC}"
+        echo -e >&2 "${RED}$SCRIPT_NAME: hook failed${NC}"
         exit "$exit_code"
     fi
 }
