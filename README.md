@@ -8,20 +8,24 @@
 
 Configure Git hooks once, use them everywhere. No more copy-pasting hooks between repos like it's 2005.
 
+NOTE: This repo requires git version 2.54 (or later). If you're using an older version of git then checkout the older version of this repository using: `git checkout pre-git-2-54`.
 
 ## 🎯 How It Works
 
-When you trigger any Git hook (like `pre-commit`), Git Multi-Hook runs all of the following triggers at the same time, in parallel.
+When you trigger any Git hook (like `pre-commit`), Git Multi-Hook runs all of the following hooks at the same time, in parallel:
 
 1. **Global hooks** → all scripts in `./hooks/pre-commit.d/*`
 2. **Repo hooks** → all scripts in `$YOUR_REPO/.git/hooks/pre-commit.d/*`
+
+Any existing hook will also be run by git itself:
+
 3. **Default hook** → `$YOUR_REPO/.git/hooks/pre-commit`
 
 Within each category, scripts are started in alphabetical order (use `01-`, `02-` prefixes for ordering).
 
-All the hooks run at the same time (up to the number of CPUs in the computer), and then results are reported in launch order, one after another until a hook reports failure or all succeed.
+All the hooks run at the same time (up to the number of CPUs in the computer). Results are reported in launch order, one after another until a hook reports failure or all succeed.
 
-Existing hooks work with no changes, except care must be taken to install `git-lfs` to avoid overwriting existing hooks; see [Caveats](#Caveats) below.
+Existing hooks work with no changes.
 
 
 ## 🚀 Installation
@@ -30,21 +34,7 @@ Run the setup script and you're good to go:
 
 ```bash
 ./setup
-# => creates hooks and sets gitconfig core.hooksPath
 ```
-
-
-## Caveats
-
-Installing Git LFS requires a little bit of extra magic to make sure the LFS hooks are installed in the correct directory, sorry!
-
-```bash
-git -c core.hooksPath="$(git rev-parse --git-dir)/hooks" lfs install
-
-# Or use the alias created by the setup script
-git lfs-install
-```
-
 
 ## ✨ Adding Your Own Hooks
 
@@ -59,9 +49,12 @@ cp your-awesome-script.sh hooks/pre-commit.d/
 
 # Make it executable
 chmod +x hooks/pre-commit.d/your-awesome-script.sh
+
+# Re-run setup to link to your gitconfig
+./setup
 ```
 
-Add repo-specific git hooks too (e.g. copy to `$YOUR-REPO/.git/hooks/pre-commit.d/`)
+Add repo-specific git hooks similarly by copying to `$YOUR-REPO/.git/hooks/pre-commit.d/` instead.
 
 
 ## 📚 Supported Hooks
@@ -110,11 +103,6 @@ Shows you which hooks are running in what order.
 ### 🤔 Skip hooks for one command ("I know what I'm doing" mode)
 ```bash
 git --no-verify commit -m "living dangerously"
-```
-
-### ☢️ Turn off globally (nuclear option)
-```bash
-git config --global --unset core.hooksPath
 ```
 
 

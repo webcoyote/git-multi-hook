@@ -2,6 +2,16 @@
 set -Eeuo pipefail
 trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
 
+# Require git 2.54+ for configuration-based hook registration
+GIT_VERSION="$(git --version | sed 's/git version //')"
+GIT_MAJOR="${GIT_VERSION%%.*}"
+GIT_MINOR="${GIT_VERSION#*.}"
+GIT_MINOR="${GIT_MINOR%%.*}"
+if [[ "$GIT_MAJOR" -lt 2 ]] || { [[ "$GIT_MAJOR" -eq 2 ]] && [[ "$GIT_MINOR" -lt 54 ]]; }; then
+    echo >&2 "ERROR: git 2.54+ is required for configuration-based hooks (found $GIT_VERSION)"
+    exit 1
+fi
+
 # Avoid recursion
 [[ -z "${RECURSE_HOOK:-}" ]] || exit
 export RECURSE_HOOK=1
@@ -130,9 +140,10 @@ if [[ -d "$REPO_HOOK_DIR" ]]; then
     done < <(find "$REPO_HOOK_DIR" -type f -print0 | sort -z || true)
 fi
 
-baseHook="$GIT_DIR/hooks/$SCRIPT_NAME"
-if [[ -x "$baseHook" ]]; then
-    call_hook "$baseHook" "$@"
-fi
+# This should be called by git
+#baseHook="$GIT_DIR/hooks/$SCRIPT_NAME"
+#if [[ -x "$baseHook" ]]; then
+#    call_hook "$baseHook" "$@"
+#fi
 
 collect_results

@@ -3,6 +3,16 @@ set -Eeuo pipefail
 trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Require git 2.54+ for configuration-based hook registration
+GIT_VERSION="$(git --version | sed 's/git version //')"
+GIT_MAJOR="${GIT_VERSION%%.*}"
+GIT_MINOR="${GIT_VERSION#*.}"
+GIT_MINOR="${GIT_MINOR%%.*}"
+if [[ "$GIT_MAJOR" -lt 2 ]] || { [[ "$GIT_MAJOR" -eq 2 ]] && [[ "$GIT_MINOR" -lt 54 ]]; }; then
+    echo >&2 "ERROR: git 2.54+ is required for configuration-based hooks (found $GIT_VERSION)"
+    exit 1
+fi
+
 HOOKS=()
 HOOKS+=(pre-commit)
 HOOKS+=(prepare-commit-msg)
@@ -28,21 +38,19 @@ HOOKS+=(push-to-checkout)
 HOOKS_DIR="$SCRIPT_DIR/hooks"
 chmod +x "$HOOKS_DIR/__hook-template"
 
-# Create all the hooks and make a directory for multi-hooking
-for hook in "${HOOKS[@]}"; do
-  mkdir -p "$HOOKS_DIR/$hook.d"
-  if [[ -n "${FORCE:-}" ]] || [[ ! -f "$HOOKS_DIR/$hook" ]]; then
-    /bin/ln -sf "__hook-template" "$HOOKS_DIR/$hook"
-  fi
-done
-
-# Add the hooks directory to the global git configuration
-# - Convert (e.g.) /Users/foo/bar/baz to ~/bar/baz
+# Convert absolute path to ~ for display/config
 HOOKS_PATH="${HOOKS_DIR/$HOME/\~}"
-git config --global core.hooksPath "$HOOKS_PATH"
 
-# Create an alias for installing git lfs
-# shellcheck disable=SC2016
-# - Expressions don't expand in single quotes, use double quotes for that
-# - That's correct: do not expand until alias is used
-git config --global alias.lfs-install '!git -c core.hooksPath="$(git rev-parse --git-dir)/hooks" lfs install'
+# For each hook type with a .d directory, create a symlink and register in global gitconfig
+for hook in "${HOOKS[@]}"; do
+    if [[ -d "$HOOKS_DIR/$hook.d" ]]; then
+        # Create symlink so __hook-template knows its hook type via $0
+        if [[ -n "${FORCE:-}" ]] || [[ ! -f "$HOOKS_DIR/$hook" ]]; then
+            /bin/ln -sf "__hook-template" "$HOOKS_DIR/$hook"
+        fi
+
+        # Register in global gitconfig
+        git config --global "hook.$hook.event" "$hook"
+        git config --global "hook.$hook.command" "$HOOKS_PATH/$hook"
+    fi
+done
