@@ -41,7 +41,19 @@ chmod +x "$HOOKS_DIR/__hook-template"
 # Convert absolute path to ~ for display/config
 HOOKS_PATH="${HOOKS_DIR/$HOME/\~}"
 
-# For each hook type with a .d directory, create a symlink and register in global gitconfig
+# Walk up from SCRIPT_DIR looking for a .gitconfig; fall back to $HOME/.gitconfig
+GITCONFIG_FILE="$HOME/.gitconfig"
+dir="$(cd "$SCRIPT_DIR/.." && pwd)"
+while :; do
+    if [[ -f "$dir/.gitconfig" ]]; then
+        GITCONFIG_FILE="$dir/.gitconfig"
+        break
+    fi
+    [[ "$dir" == "/" ]] && break
+    dir="$(dirname "$dir")"
+done
+
+# For each hook type with a .d directory, create a symlink and register in gitconfig
 for hook in "${HOOKS[@]}"; do
     if [[ -d "$HOOKS_DIR/$hook.d" ]]; then
         # Create symlink so __hook-template knows its hook type via $0
@@ -49,8 +61,8 @@ for hook in "${HOOKS[@]}"; do
             /bin/ln -sf "__hook-template" "$HOOKS_DIR/$hook"
         fi
 
-        # Register in global gitconfig
-        git config --global "hook.$hook.event" "$hook"
-        git config --global "hook.$hook.command" "$HOOKS_PATH/$hook"
+        # Register in gitconfig
+        git config --file "$GITCONFIG_FILE" "hook.$hook.event" "$hook"
+        git config --file "$GITCONFIG_FILE" "hook.$hook.command" "$HOOKS_PATH/$hook"
     fi
 done
