@@ -2,7 +2,7 @@
 # Ensure source files end with a blank line
 # Strict mode - fail fast on errors
 set -Eeuo pipefail
-trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
+trap 'echo >&2 "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
 # shellcheck source-path=SCRIPTDIR
 source "$(dirname "${BASH_SOURCE[0]}")/../__common"
 
