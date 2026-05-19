@@ -5,6 +5,11 @@ trap 'echo >&2 "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ER
 # shellcheck source-path=SCRIPTDIR
 source "$(dirname "${BASH_SOURCE[0]}")/../__common"
 
+if [[ -n "${IGNORE_VALIDATE:-}" ]]; then
+    warn "IGNORE_VALIDATE enabled; skipping validate"
+    exit 0
+fi
+
 cd "$(repo_dir)"
 
 if ! command -v "scripts/validate" &>/dev/null ; then
