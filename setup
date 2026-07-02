@@ -62,7 +62,7 @@ for hook in "${HOOKS[@]}"; do
         fi
 
         # Register in gitconfig
-        git config --file "$GITCONFIG_FILE" "hook.$hook.event" "$hook"
-        git config --file "$GITCONFIG_FILE" "hook.$hook.command" "$HOOKS_PATH/$hook"
+        git config --file "$GITCONFIG_FILE" "hook.multi-${hook}.event" "$hook"
+        git config --file "$GITCONFIG_FILE" "hook.multi-${hook}.command" "$HOOKS_PATH/$hook"
     fi
 done
