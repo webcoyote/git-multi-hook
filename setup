@@ -58,7 +58,7 @@ for hook in "${HOOKS[@]}"; do
     if [[ -d "$HOOKS_DIR/$hook.d" ]]; then
         # Create symlink so __hook-template knows its hook type via $0
         if [[ -n "${FORCE:-}" ]] || [[ ! -f "$HOOKS_DIR/$hook" ]]; then
-            /bin/ln -sf "__hook-template" "$HOOKS_DIR/$hook"
+            ln -sf "__hook-template" "$HOOKS_DIR/$hook"
         fi
 
         # Register in gitconfig
